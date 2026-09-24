@@ -23,10 +23,13 @@ export function compileWorkflow(
     executionId: string,
     userId: string,
   ) {
-    const graph = new StateGraph(WorkflowState);
+    // Use `any` for the graph builder: node ids are dynamic strings, so the
+    // default `N = typeof START` generic would reject `trigger.id` / edge
+    // endpoints in `addEdge` / `addConditionalEdges`.
+    const graph: any = new StateGraph(WorkflowState);
   
     for (const node of nodes) {
-      graph.addNode(node.id, async (state) =>
+      graph.addNode(node.id, async (state: any) =>
         executeCanvasNode(state, node, executionId, userId),
       );
     }
@@ -49,7 +52,7 @@ export function compileWorkflow(
         pathMap[branch] = edge.target;
       }
   
-      graph.addConditionalEdges(node.id, (state) => state.branch || "false", pathMap);
+      graph.addConditionalEdges(node.id, (state: any) => state.branch || "false", pathMap);
       conditionalSources.add(node.id);
     }
   
